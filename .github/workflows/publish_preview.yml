@@ -19,7 +19,7 @@ jobs:
       - name: Detect application name
         id: detect_app
         run: |
-          app_name=${${{ github.event.comment.body }}:6}
+          app_name=${"${{ github.event.comment.body }}":6}
 
           valid_app_names=(foo bar buz)
 
