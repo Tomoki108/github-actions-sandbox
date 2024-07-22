@@ -7,7 +7,7 @@ on:
 jobs:
   preview-publish:
     # PR上のコメントであり、"/prev "から始まる内容であれば実行する
-    if: github.event_name == 'issue_comment' && contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body, '/prev')
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body, '/prev ')
     permissions:
       contents: "read"
       id-token: "write"
@@ -19,16 +19,19 @@ jobs:
       - name: Detect application name
         id: detect_app
         run: |
-          # 有効なアプリ名のリスト
-          app_names=(foo bar buz)
-          app_name_regex=$(IFS="|"; echo "${app_names[*]}")
+          app_name=${${{ github.event.comment.body }}:6}
 
-          if [[ "${{ github.event.comment.body }}" =~ ^\/prev\s+($app_name_regex)$ ]]; then
-            echo "app=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-          else
-            echo "Not a valid application name. Skipping deployment."
-            exit 0
-          fi
+          valid_app_names=(foo bar buz)
+
+          for valid_app_name in "${valid_app_names[@]}"; do
+            if [[ $app_name == $valid_app ]]; then
+              echo "app=$app_name" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+
+          echo "Invalid app name: $app_name"
+          exit 1
 
       - name: Detect PR
         id: detect_pr
