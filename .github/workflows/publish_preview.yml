@@ -5,16 +5,19 @@ on:
     types: [created]
 
 jobs:
-  preview-publish:
+  detect-command:
     # PR上のコメントであり、"/prev "から始まる内容であれば実行する
     if: github.event_name == 'issue_comment' && contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body, '/prev ')
     permissions:
       contents: "read"
-      id-token: "write"
-      issues: "write"
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
+    outputs:
+      app: ${{ steps.detect_app.outputs.app }}
+      branch: ${{ steps.detect_pr.outputs.branch }}
+      base_branch: ${{ steps.detect_pr.outputs.base_branch }}
+      sha: ${{ steps.detect_pr.outputs.sha }}
+      pr_number: ${{ steps.detect_pr.outputs.pr_number }}
     steps:
       - name: Detect application name
         id: detect_app
@@ -40,7 +43,7 @@ jobs:
           echo "branch=$(echo $PR | jq -r '.head.ref')" >> $GITHUB_OUTPUT
           echo "base_branch=$(echo $PR | jq -r '.base.ref')" >> $GITHUB_OUTPUT
           echo "sha=$(echo $PR | jq -r '.head.sha')" >> $GITHUB_OUTPUT
-          echo "number=$(echo $PR | jq -r '.number')" >> $GITHUB_OUTPUT
+          echo "pr_number=$(echo $PR | jq -r '.number')" >> $GITHUB_OUTPUT
 
       - name: Check if base branch is env branch
         run: |
@@ -57,10 +60,17 @@ jobs:
           echo "Invalid base branch: $base_branch"
           exit 1
 
+  publish-preview:
+    needs: detect-command
+    permissions:
+      id-token: "write"
+      issues: "write"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
       - name: Dump vars
         run: |
-          echo "app=${{ steps.detect_app.outputs.app }}"
-          echo "branch=${{ steps.detect_pr.outputs.branch }}"
-          echo "base_branch=${{ steps.detect_pr.outputs.base_branch }}"
-          echo "sha=${{ steps.detect_pr.outputs.sha }}"
-          echo "number=${{ steps.detect_pr.outputs.number }}"
+          echo "app=${{ needs.detect-command.outputs.app }}"
+          echo "branch=${{ needs.detect-command.outputs.branch }}"
+          echo "sha=${{ needs.detect-command.outputs.sha }}"
+          echo "pr_number=${{ needs.detect-command.outputs.pr_number }}"
