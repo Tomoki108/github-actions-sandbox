@@ -44,7 +44,7 @@ jobs:
 
       - name: Check if base branch is env branch
         run: |
-          base_branch = ${{ steps.detect_pr.outputs.base_branch }}
+          base_branch=${{ steps.detect_pr.outputs.base_branch }}
 
           valid_base_branches=(stg qa dev)
           for valid_base_branch in "${valid_base_branches[@]}"; do
