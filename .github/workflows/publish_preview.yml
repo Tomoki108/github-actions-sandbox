@@ -44,16 +44,18 @@ jobs:
 
       - name: Check if base branch is env branch
         run: |
-          # 有効なベースブランチのリスト
-          base_branches=(stg qa dev)
-          base_branch_regex=$(IFS="|"; echo "${base_branches[*]}")
+          base_branch = ${{ steps.detect_pr.outputs.base_branch }}
 
-          if [[ "${{ steps.detect_pr.outputs.base_branch }}" =~ ^($base_branch_regex)$ ]]; then
-            echo "Base branch is valid."
-          else
-            echo "The base branch does not match dev, qa, or stg. Skipping deployment."
-            exit 0
-          fi
+          valid_base_branches=(stg qa dev)
+          for valid_base_branch in "${valid_base_branches[@]}"; do
+            if [[ $base_branch == $valid_base_branch ]]; then
+              echo "Valid base branch: $valid_base_branch"
+              exit 0
+            fi
+          done
+
+          echo "Invalid base branch: $base_branch"
+          exit 1
 
       - name: Dump vars
         run: |
