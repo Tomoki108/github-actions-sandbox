@@ -4,6 +4,10 @@ on:
   issue_comment:
     types: [created]
 
+env:
+  ENVIROMNMENTS: stg qa dev
+  APPS: foo bar buz
+
 jobs:
   detect-command:
     # PR上のコメントであり、"/prev "から始まる内容であれば実行する
@@ -24,8 +28,7 @@ jobs:
         run: |
           app_name=$(echo "${{ github.event.comment.body }}" | sed 's|^/prev ||')
 
-          valid_app_names=(foo bar buz)
-          for valid_app_name in "${valid_app_names[@]}"; do
+          for valid_app_name in "${APPS[@]}"; do
             if [[ $app_name == $valid_app_name ]]; then
               echo "Valid app name: $app_name"
               echo "app=$app_name" >> $GITHUB_OUTPUT
@@ -49,8 +52,7 @@ jobs:
         run: |
           base_branch=${{ steps.detect_pr.outputs.base_branch }}
 
-          valid_base_branches=(stg qa dev)
-          for valid_base_branch in "${valid_base_branches[@]}"; do
+          for valid_base_branch in "${ENVIROMNMENTS[@]}"; do
             if [[ $base_branch == $valid_base_branch ]]; then
               echo "Valid base branch: $valid_base_branch"
               exit 0
