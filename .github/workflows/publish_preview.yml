@@ -23,7 +23,7 @@ jobs:
       - name: Detect application name
         id: detect_app
         run: |
-          app_name=$(echo "${{ github.event.comment.body }}" | sed 's|^/prev ||')
+          app_name=$(echo "${{ github.event.comment.body }}" | sed -n 's/.*prev \([^ ]*\).*/\1/p')
 
           valid_app_names=(foo bar buz)
           for valid_app_name in "${valid_app_names[@]}"; do
