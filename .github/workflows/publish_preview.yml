@@ -65,6 +65,7 @@ jobs:
           exit 1
 
       - name: Check if base branch is env branch
+        if: contains(github.event.comment.body, '--env ') == false
         run: |
           base_branch=${{ steps.detect_pr.outputs.base_branch }}
 
