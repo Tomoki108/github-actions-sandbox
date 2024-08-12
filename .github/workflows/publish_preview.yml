@@ -50,7 +50,7 @@ jobs:
         id: detect_env
         if: contains(github.event.comment.body, '--env ')
         run: |
-          env_name=$(echo $input | sed -n 's/.*--env \([^ ]*\).*/\1/p')
+          env_name=$(echo ${{ github.event.comment.body }} | sed -n 's/.*--env \([^ ]*\).*/\1/p')
 
           valid_env_names=(stg qa dev)
           for valid_env_name in "${valid_env_names[@]}"; do
